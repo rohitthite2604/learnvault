@@ -1,5 +1,6 @@
 package com.learnvault.learnvaultbackend.controller;
 
+import com.learnvault.learnvaultbackend.dto.DocumentResponse;
 import com.learnvault.learnvaultbackend.dto.RagResponse;
 import com.learnvault.learnvaultbackend.dto.RetrievedChunkResponse;
 import com.learnvault.learnvaultbackend.model.Document;
@@ -86,6 +87,13 @@ public class DocumentController {
     @GetMapping("/rag")
     public RagResponse rag(@RequestParam String question, @RequestParam Long knowledgeSpaceId) {
         return ragService.answer(question, knowledgeSpaceId, "");
+    }
+
+    @GetMapping
+    public List<DocumentResponse> getDocuments(
+            @RequestParam Long knowledgeSpaceId) {
+
+        return documentService.getDocumentsByKnowledgeSpaceId(knowledgeSpaceId);
     }
 
 }

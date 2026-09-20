@@ -1,0 +1,53 @@
+<div class="page-header">
+    <div>
+        <h1>Documents</h1>
+        <p>Your learning material for this knowledge space.</p>
+    </div>
+
+    <div class="header-actions">
+
+        <button
+            mat-flat-button
+            type="button"
+            [routerLink]="['/chat', knowledgeSpaceId()]">
+        
+            <mat-icon>chat</mat-icon>
+            Open AI Tutor
+
+        </button>
+
+        <label 
+            class="upload-button"
+            [class.disabled]="uploading()">
+
+            <span>
+                {{uploading() ? 'Processing...' : 'Upload PDF'}}
+            </span>
+
+            <input 
+                type="file"
+                accept=".pdf"
+                (change)="onFileSelected($event)"
+                [disabled]="uploading()">
+        </label>
+    </div>
+</div>
+
+
+<div class="document-grid">
+@for (document of documents(); track document.id) {
+
+    <mat-card class="document-card">
+
+        <mat-card-header>
+            <mat-card-title>
+                {{ document.name }}
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <p> Added {{ document.createdAt | date }} </p>
+        </mat-card-content>
+    </mat-card>
+}
+</div>

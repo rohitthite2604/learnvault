@@ -1,0 +1,62 @@
+<mat-sidenav-container class="app-container">
+
+  <mat-sidenav
+    class="sidebar"
+    mode="side"
+    opened>
+
+    <div class="sidebar-header">
+      <mat-icon>school</mat-icon>
+      <span>LearnVault</span>
+    </div>
+
+    <mat-nav-list>
+
+      <a
+        mat-list-item
+        routerLink="/knowledge-spaces"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+
+        <mat-icon matListItemIcon>auto_stories</mat-icon>
+        <span matListItemTitle>Knowledge Spaces</span>
+
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/documents"
+        routerLinkActive="active">
+
+        <mat-icon matListItemIcon>description</mat-icon>
+        <span matListItemTitle>Documents</span>
+
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/chat"
+        routerLinkActive="active">
+
+        <mat-icon matListItemIcon>chat</mat-icon>
+        <span matListItemTitle>Chat</span>
+
+      </a>
+
+    </mat-nav-list>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <mat-toolbar class="top-toolbar">
+      <span>Personal AI Learning Assistant</span>
+    </mat-toolbar>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

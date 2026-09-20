@@ -1,0 +1,106 @@
+<div class="chat-page">
+
+    <div class="chat-header">
+        <div>
+            <h1>AI Tutor</h1>
+            <p>Ask questions about your learning material.</p>
+        </div>
+    </div>
+
+    <div class="chat-container">
+
+        <div class="messages">
+
+            @if (messages().length === 0) {
+                <div class="empty-state">
+                    <mat-icon>auto_awesome</mat-icon>
+
+                    <h2>Start learning</h2>
+
+                    <p>Ask a question about the documents in this knowledge space.</p>
+                </div>
+            }
+
+            @for (chatMessage of messages(); track $index) {
+
+                <div class="message"
+                [class.user-message]="chatMessage.role === 'user'"
+                [class.assistant-message]="chatMessage.role === 'assistant'">
+
+                <div class="message-content">
+                    {{chatMessage.content}}
+                </div>
+
+                @if (
+                    chatMessage.role === 'assistant' &&
+                    chatMessage.sources &&
+                    chatMessage.sources.length > 0
+                ) {
+
+                    <div class="sources">
+
+                        <div class="sources-title">
+                            <mat-icon>menu_book</mat-icon>
+                            <span>Sources</span>
+                        </div>
+
+                        @for (source of chatMessage.sources; track  $index) {
+
+                            <div class="source-item">
+
+                                <span class="source-name">
+                                    {{source.documentName}}
+                                </span>
+
+                                <span class="source-page">
+                                    Page {{source.pageNumber}}
+                                </span>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                }
+            
+                </div>
+
+            }
+
+            @if (sending()) {
+                <div class="message assistant-message">
+                    <div class="message-content processing">
+                        Thinking...
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div class="message-input">
+
+            <textarea
+             placeholder="Ask a question..."
+             rows="2"
+             [value]="message()"
+             (input)="onMessageChange($event)"
+             (keydown.enter)="$event.preventDefault(); sendMessage()"
+             [disabled]="sending()">
+            </textarea>
+
+            <button
+            mat-flat-button
+            type="button"
+            (click)="sendMessage()"
+            [disabled]="!message().trim() || sending()">
+            <mat-icon>send</mat-icon>
+            Send
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

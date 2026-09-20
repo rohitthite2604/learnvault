@@ -1,5 +1,6 @@
 package com.learnvault.learnvaultbackend.service;
 
+import com.learnvault.learnvaultbackend.dto.DocumentResponse;
 import com.learnvault.learnvaultbackend.model.Document;
 import com.learnvault.learnvaultbackend.model.DocumentChunk;
 import com.learnvault.learnvaultbackend.model.KnowledgeSpace;
@@ -59,5 +60,18 @@ public class DocumentService {
             documentChunkRepository.save(chunk);
         }
         return document;
+    }
+
+    public List<DocumentResponse> getDocumentsByKnowledgeSpaceId(Long knowledgeSpaceId) {
+
+        List<Document> documents = documentRepository.findByKnowledgeSpaceId(knowledgeSpaceId);
+
+        return documents.stream()
+                .map(document -> new DocumentResponse(
+                        document.getId(),
+                        document.getName(),
+                        document.getCreatedAt()
+                ))
+                .toList();
     }
 }

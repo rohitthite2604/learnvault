@@ -1,0 +1,28 @@
+<div class="page-header">
+    <h1>Knowledge Spaces</h1>
+    <p>Select a knowledge space to start learning.</p>
+</div>
+
+<div class="knowledge-space-grid">
+    @for (space of knowledgeSpaces(); track space.id) {
+        <mat-card class="knowledge-space-card">
+            <mat-card-header>
+                <mat-card-title>
+                    {{space.name}}
+                </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+                <p>{{space.description}}</p>
+            </mat-card-content>
+
+        <mat-card-actions>
+            <button 
+             mat-button
+             [routerLink]="['/documents', space.id]">
+             Open
+            </button>
+      </mat-card-actions>
+        </mat-card>
+    }
+</div>
