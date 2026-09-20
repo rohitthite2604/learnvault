@@ -25,6 +25,10 @@ export const routes: Routes = [
       {
         path: 'chat/:knowledgeSpaceId',
         component: Chat
+      },
+      {
+        path: 'chat/:knowledgeSpaceId/:conversationId',
+        component: Chat
       }
     ]
   }

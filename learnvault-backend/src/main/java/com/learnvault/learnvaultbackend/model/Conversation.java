@@ -36,4 +36,8 @@ public class Conversation {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "knowledge_space_id", nullable = false)
+    private KnowledgeSpace knowledgeSpace;
 }

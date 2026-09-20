@@ -15,3 +15,17 @@ export interface ChatResponse {
     answer: string;
     sources: SourceResponse[];
 }
+
+export interface ConversationResponse {
+    id: number;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface MessageResponse {
+    id: number;
+    role: 'USER' | 'ASSISTANT';
+    content: string;
+    createdAt: string;
+}

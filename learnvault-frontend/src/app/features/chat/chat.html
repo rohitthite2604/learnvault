@@ -1,105 +1,172 @@
 <div class="chat-page">
 
-    <div class="chat-header">
-        <div>
-            <h1>AI Tutor</h1>
-            <p>Ask questions about your learning material.</p>
-        </div>
-    </div>
+    <div class="chat-layout">
 
-    <div class="chat-container">
+        <!-- Conversation History Sidebar -->
+        <aside class="chat-sidebar">
 
-        <div class="messages">
+            <button mat-button class="new-chat-button" type="button" (click)="newChat()">
 
-            @if (messages().length === 0) {
-                <div class="empty-state">
-                    <mat-icon>auto_awesome</mat-icon>
+                <mat-icon>add</mat-icon>
+                <span>New Chat</span>
 
-                    <h2>Start learning</h2>
+            </button>
 
-                    <p>Ask a question about the documents in this knowledge space.</p>
-                </div>
+            <h3 class="sidebar-heading">Chat History</h3>
+
+            @if (loadingConversations()) {
+
+            <p class="sidebar-message">Loading conversations...</p>
+
+            } @else if (conversations().length === 0) {
+
+            <p class="sidebar-message">No conversations yet.</p>
+
+            } @else {
+
+            <div class="conversation-list">
+
+                @for (conversation of conversations(); track conversation.id) {
+
+                <button mat-button type="button" class="conversation-item"
+                    [class.active]="conversationId() === conversation.id" (click)="openConversation(conversation)">
+
+                    <mat-icon>chat_bubble_outline</mat-icon>
+
+                    <span class="conversation-title">
+                        {{ conversation.title }}
+                    </span>
+
+                </button>
+
+                }
+
+            </div>
+
             }
 
-            @for (chatMessage of messages(); track $index) {
+        </aside>
 
-                <div class="message"
-                [class.user-message]="chatMessage.role === 'user'"
-                [class.assistant-message]="chatMessage.role === 'assistant'">
+        <!-- Main Chat Area -->
+        <main class="chat-main">
 
-                <div class="message-content">
-                    {{chatMessage.content}}
+            <div class="chat-header">
+                <div>
+                    <h1>AI Tutor</h1>
+                    <p>Ask questions about your learning material.</p>
                 </div>
+            </div>
 
-                @if (
-                    chatMessage.role === 'assistant' &&
-                    chatMessage.sources &&
-                    chatMessage.sources.length > 0
-                ) {
+            <div class="chat-container">
 
-                    <div class="sources">
+                <div class="messages">
 
-                        <div class="sources-title">
-                            <mat-icon>menu_book</mat-icon>
-                            <span>Sources</span>
+                    @if (loadingMessages()) {
+
+                    <div class="loading-state">
+                        <mat-icon>hourglass_empty</mat-icon>
+                        <p>Loading conversation...</p>
+                    </div>
+
+                    } @else {
+
+                    @if (messages().length === 0) {
+
+                    <div class="empty-state">
+                        <mat-icon>auto_awesome</mat-icon>
+
+                        <h2>Start learning</h2>
+
+                        <p>
+                            Ask a question about the documents in this knowledge space.
+                        </p>
+                    </div>
+
+                    }
+
+                    @for (chatMessage of messages(); track $index) {
+
+                    <div class="message" [class.user-message]="chatMessage.role === 'user'"
+                        [class.assistant-message]="chatMessage.role === 'assistant'">
+
+                        <div class="message-content">
+                            {{ chatMessage.content }}
                         </div>
 
-                        @for (source of chatMessage.sources; track  $index) {
+                        @if (
+                        chatMessage.role === 'assistant' &&
+                        chatMessage.sources &&
+                        chatMessage.sources.length > 0
+                        ) {
+
+                        <div class="sources">
+
+                            <div class="sources-title">
+                                <mat-icon>menu_book</mat-icon>
+                                <span>Sources</span>
+                            </div>
+
+                            @for (source of chatMessage.sources; track $index) {
 
                             <div class="source-item">
 
                                 <span class="source-name">
-                                    {{source.documentName}}
+                                    {{ source.documentName }}
                                 </span>
 
                                 <span class="source-page">
-                                    Page {{source.pageNumber}}
+                                    Page {{ source.pageNumber }}
                                 </span>
 
                             </div>
+
+                            }
+
+                        </div>
 
                         }
 
                     </div>
 
-                }
-            
-                </div>
+                    }
 
-            }
+                    @if (sending()) {
 
-            @if (sending()) {
-                <div class="message assistant-message">
-                    <div class="message-content processing">
-                        Thinking...
+                    <div class="message assistant-message">
+                        <div class="message-content processing">
+                            Thinking...
+                        </div>
                     </div>
+
+                    }
+
+                    }
+
                 </div>
-            }
 
-        </div>
+                <div class="message-input">
 
-        <div class="message-input">
+                    <textarea placeholder="Ask a question..." rows="2" [value]="message()"
+                        (input)="onMessageChange($event)" (keydown.enter)="$event.preventDefault(); sendMessage()"
+                        [disabled]="sending() || loadingMessages()">
+      </textarea>
 
-            <textarea
-             placeholder="Ask a question..."
-             rows="2"
-             [value]="message()"
-             (input)="onMessageChange($event)"
-             (keydown.enter)="$event.preventDefault(); sendMessage()"
-             [disabled]="sending()">
-            </textarea>
+                    <button mat-flat-button type="button" (click)="sendMessage()" [disabled]="
+          !message().trim() ||
+          sending() ||
+          loadingMessages()
+        ">
 
-            <button
-            mat-flat-button
-            type="button"
-            (click)="sendMessage()"
-            [disabled]="!message().trim() || sending()">
-            <mat-icon>send</mat-icon>
-            Send
+                        <mat-icon>send</mat-icon>
+                        Send
 
-            </button>
+                    </button>
 
-        </div>
+                </div>
+
+            </div>
+
+        </main>
 
     </div>
 
