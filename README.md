@@ -960,6 +960,9 @@ Potential future improvements include:
 * Cloud deployment
 * Advanced AI workflows
 * More advanced UI/UX
+* Knowledge Space deletion with cascading document cleanup
+* Document deletion with associated chunk and embedding cleanup
+* Conversation deletion and message cleanup
 
 These improvements are intentionally separated from V1 so that the core product remains small and maintainable.
 
