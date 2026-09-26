@@ -754,7 +754,7 @@ node --version
 ## 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/rohitthite2604/learnvault.git
 cd learnvault
 ```
 
