@@ -1,6 +1,17 @@
 <div class="page-header">
-    <h1>Knowledge Spaces</h1>
-    <p>Select a knowledge space to start learning.</p>
+    <div>
+        <h1>Knowledge Spaces</h1>
+        <p>Select a knowledge space to start learning.</p>
+    </div>
+
+    <button
+        mat-flat-button
+        type="button"
+        (click)="openCreateDialog(createSpaceForm)">
+        <mat-icon>add</mat-icon>
+        Add Knowledge Space
+    </button>
+
 </div>
 
 <div class="knowledge-space-grid">
@@ -24,5 +35,49 @@
             </button>
       </mat-card-actions>
         </mat-card>
+
     }
+
 </div>
+
+<ng-template #createSpaceForm>
+
+    <form [formGroup]="createForm">
+
+        <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+
+            <input
+                matInput
+                formControlName="name"
+                placeholder="e.g. Java">
+
+            @if (createForm.controls.name.hasError('required')) {
+                <mat-error>Name is required.</mat-error>
+            }
+
+            @if (createForm.controls.name.hasError('maxlength')) {
+                <mat-error>Name cannot exceed 100 characters.</mat-error>
+            }
+
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+
+            <textarea
+                matInput
+                formControlName="description"
+                rows="4"
+                placeholder="Describe what you want to learn">
+            </textarea>
+
+            @if (createForm.controls.description.hasError('maxlength')) {
+                <mat-error>Description cannot exceed 500 characters.</mat-error>
+            }
+
+        </mat-form-field>
+
+    </form>
+
+</ng-template>

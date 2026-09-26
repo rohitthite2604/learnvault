@@ -12,7 +12,13 @@ export class KnowledgeSpaceService {
 
     private readonly apiUrl = 'http://localhost:8080/api/knowledge-spaces';
 
-    getAll(): Observable<KnowledgeSpace[]> {
+    getKnowledgeSpaces(): Observable<KnowledgeSpace[]> {
         return this.http.get<KnowledgeSpace[]>(this.apiUrl);
+    }
+
+    createKnowledgeSpace(
+        request: { name: string; description: string} 
+    ): Observable<KnowledgeSpace> {
+        return this.http.post<KnowledgeSpace>(this.apiUrl, request);
     }
 }

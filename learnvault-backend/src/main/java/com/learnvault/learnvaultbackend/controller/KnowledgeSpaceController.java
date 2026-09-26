@@ -1,10 +1,10 @@
 package com.learnvault.learnvaultbackend.controller;
 
+import com.learnvault.learnvaultbackend.dto.KnowledgeSpaceRequest;
 import com.learnvault.learnvaultbackend.model.KnowledgeSpace;
 import com.learnvault.learnvaultbackend.service.KnowledgeSpaceService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,5 +21,10 @@ public class KnowledgeSpaceController {
     @GetMapping
     public List<KnowledgeSpace> getAllKnowledgeSpaces() {
         return knowledgeSpaceService.getAllKnowledgeSpaces();
+    }
+
+    @PostMapping
+    public KnowledgeSpace createKnowledgeSpace(@Valid @RequestBody KnowledgeSpaceRequest request) {
+        return knowledgeSpaceService.createKnowledgeSpace(request);
     }
 }

@@ -2,32 +2,38 @@
 
 **LearnVault — Personal AI Learning Assistant**
 
-LearnVault is a personal AI-powered learning assistant that allows users to upload their learning materials and ask questions about them using a locally running Retrieval-Augmented Generation (RAG) pipeline.
+LearnVault is a local AI-powered learning assistant that allows users to upload their learning materials and ask questions about them using a Retrieval-Augmented Generation (RAG) pipeline.
 
-The goal is to create a practical learning assistant that can answer questions based on the user's own knowledge base rather than relying only on the model's general knowledge.
+Instead of relying only on an LLM's general knowledge, LearnVault retrieves relevant information from the user's own learning materials and uses that context to generate grounded answers.
+
+The application combines an **Angular frontend**, **Spring Boot backend**, **LangChain4j**, **Ollama**, **PostgreSQL**, and **pgvector** to provide a complete local RAG application.
 
 ---
 
-## 🚧 Project Status
+## 🚀 Project Status
 
-**Current status: Backend RAG pipeline completed**
+**LearnVault V1 — Completed**
 
-The backend currently supports:
+The current V1 provides:
 
 * Knowledge Spaces
-* PDF upload
-* PDF text extraction
-* Page-aware document chunking
-* Local embeddings
+* PDF document upload and management
+* Page-aware PDF text extraction
+* Document chunking
+* Local embedding generation
 * PostgreSQL + pgvector vector storage
 * Semantic similarity search
-* Retrieval-Augmented Generation (RAG)
+* Retrieval-Augmented Generation
 * Local LLM inference through Ollama
 * Conversational chat history
 * Follow-up question rewriting
-* Source references in responses
+* Source references
+* Angular-based user interface
+* Conversation history and reopening
+* Basic validation and error handling
+* Loading and error states
 
-The Angular frontend is the next major development phase.
+The application runs locally and does not require a cloud AI provider.
 
 ---
 
@@ -42,21 +48,31 @@ Learning materials are often scattered across:
 * Reference material
 * Other study resources
 
-It becomes difficult to remember:
+When learning from multiple sources, it can become difficult to remember:
 
 > "Where did I learn this?"
 
-LearnVault aims to solve this by creating a personal knowledge base where users can upload their learning material and ask questions directly against it.
+LearnVault addresses this by creating a personal knowledge base where users can organize learning material into **Knowledge Spaces** and ask questions directly against their uploaded documents.
 
 For example:
 
 ```text
 User:
+
 What is LangChain?
 
-LearnVault:
-[Answer based on uploaded documents]
-[Source: LangChain.pdf, Page 1]
+        ↓
+
+LearnVault retrieves relevant chunks
+from the user's uploaded documents
+
+        ↓
+
+LLM generates a grounded answer
+
+        ↓
+
+Source references are returned
 ```
 
 Follow-up questions are also supported:
@@ -69,13 +85,13 @@ User:
 What are its main components?
 ```
 
-LearnVault understands that "its" refers to LangChain and rewrites the question before performing retrieval.
+LearnVault uses the conversation history to understand that **"its"** refers to LangChain before performing retrieval.
 
 ---
 
 # 🏗️ Architecture
 
-The current backend follows a simple RAG architecture:
+LearnVault follows a simple full-stack RAG architecture:
 
 ```text
                     ┌─────────────────┐
@@ -89,48 +105,46 @@ The current backend follows a simple RAG architecture:
                     │    Backend      │
                     └────────┬────────┘
                              │
-             ┌───────────────┼────────────────┐
-             │               │                │
-             ▼               ▼                ▼
-      Document Upload      Chat          Conversation
-             │               │             History
-             ▼               │
-        PDF Extraction       │
-             │               │
-             ▼               │
-          Chunking            │
-             │               │
-             ▼               │
-        Embeddings            │
-             │               │
-             ▼               │
-      PostgreSQL +            │
-         pgvector             │
-             │               │
-             └───────┬───────┘
-                     ▼
-               Similarity Search
-                     │
-                     ▼
-              Retrieved Context
-                     │
-                     ▼
-               Ollama / Llama 3.2
-                     │
-                     ▼
-                  Answer
-                     │
-                     ▼
-                Source References
+              ┌──────────────┼───────────────┐
+              │              │               │
+              ▼              ▼               ▼
+        Document Upload    Chat        Conversation
+              │                              History
+              ▼
+       PDF Text Extraction
+              │
+              ▼
+          Chunking
+              │
+              ▼
+         Embeddings
+              │
+              ▼
+      PostgreSQL + pgvector
+              │
+              ▼
+      Similarity Search
+              │
+              ▼
+      Retrieved Context
+              │
+              ▼
+        Ollama / Llama 3.2
+              │
+              ▼
+          Answer
+              │
+              ▼
+      Source References
 ```
 
 ---
 
 # 🧠 RAG Pipeline
 
-LearnVault uses Retrieval-Augmented Generation instead of sending the entire document directly to the LLM.
+LearnVault uses Retrieval-Augmented Generation instead of sending an entire document directly to the LLM.
 
-The ingestion pipeline is:
+## Document Ingestion
 
 ```text
 PDF
@@ -144,7 +158,18 @@ Embedding Generation
 PostgreSQL + pgvector
 ```
 
-The question-answering pipeline is:
+Each document is divided into smaller chunks.
+
+Each chunk retains information about:
+
+* Document
+* Page number
+* Text content
+* Vector embedding
+
+This allows relevant portions of the uploaded material to be retrieved later.
+
+## Question Answering
 
 ```text
 User Question
@@ -172,7 +197,7 @@ Source References
 
 # 🔄 Conversational RAG
 
-A major feature of the backend is contextual follow-up question handling.
+LearnVault supports contextual follow-up questions.
 
 For example:
 
@@ -184,25 +209,19 @@ User:
 What are its main components?
 ```
 
-The second question is ambiguous when considered by itself.
+The second question is ambiguous when considered independently.
 
-Instead of directly embedding:
-
-```text
-What are its main components?
-```
-
-LearnVault uses the conversation history to rewrite it into:
+LearnVault uses the conversation history to rewrite the question into a standalone form:
 
 ```text
 What are the main components of LangChain?
 ```
 
-The rewritten question is then used for vector retrieval.
+The rewritten question is then embedded and used for vector retrieval.
 
-The original question and conversation history are still provided to the final LLM.
+The original conversation history and current question are still available to the final answer-generation step.
 
-This gives the system:
+Conceptually:
 
 ```text
 Conversation History
@@ -224,6 +243,14 @@ Final Answer
 
 # 🛠️ Technology Stack
 
+## Frontend
+
+* Angular
+* Angular Material
+* TypeScript
+* Reactive Forms
+* Angular Router
+
 ## Backend
 
 * Java 21
@@ -242,7 +269,7 @@ Final Answer
 ## Embeddings
 
 * Ollama
-* nomic-embed-text
+* `nomic-embed-text`
 * 768-dimensional embeddings
 
 ## Database
@@ -250,17 +277,11 @@ Final Answer
 * PostgreSQL 18
 * pgvector 0.8.6
 
-## Frontend
-
-* Angular
-
-The Angular frontend is currently under development.
-
 ---
 
-# 📦 Main Components
+# 📦 Main Features
 
-### Knowledge Spaces
+## Knowledge Spaces
 
 Knowledge Spaces provide logical separation between different learning domains.
 
@@ -273,29 +294,37 @@ Spring Boot
 System Design
 ```
 
-Retrieval is performed within the selected Knowledge Space rather than searching every document in the database.
+Documents belong to a Knowledge Space, and retrieval is restricted to the selected Knowledge Space.
+
+This prevents documents from unrelated learning domains from being included in the retrieval process.
 
 ---
 
-### Documents
+## Documents
 
-Uploaded PDFs belong to a Knowledge Space.
+Users can upload PDF learning materials to a selected Knowledge Space.
 
-Relationship:
+The document processing flow is:
 
 ```text
-KnowledgeSpace
-      │
-      └── Documents
-             │
-             └── Document Chunks
+PDF Upload
+    ↓
+Text Extraction
+    ↓
+Page-aware Chunking
+    ↓
+Embedding Generation
+    ↓
+Vector Storage
 ```
+
+Uploaded documents can be viewed from the corresponding Knowledge Space.
 
 ---
 
-### Document Chunks
+## Document Chunks
 
-Each document is divided into smaller chunks.
+Documents are divided into smaller chunks before generating embeddings.
 
 Each chunk stores:
 
@@ -304,25 +333,59 @@ Each chunk stores:
 * Page number
 * Vector embedding
 
-This allows LearnVault to retrieve the most relevant sections of a document.
+This allows LearnVault to retrieve only the most relevant portions of a document.
 
 ---
 
-### Vector Search
+## Vector Search
 
-Document chunks are stored in PostgreSQL using pgvector.
+Document chunks are stored in PostgreSQL using the `pgvector` extension.
 
-Similarity search is performed using the vector distance operator:
+Semantic similarity search is performed using vector distance:
 
 ```sql
-<=> 
+<=>
 ```
 
-The system retrieves the top relevant chunks for a user's question.
+The system retrieves the most relevant chunks for a user's question.
 
 ---
 
-### Conversation History
+## Chat
+
+The Angular frontend provides a conversational interface for interacting with the user's knowledge base.
+
+A chat request contains:
+
+```json
+{
+  "conversationId": null,
+  "knowledgeSpaceId": 1,
+  "message": "What is LangChain?"
+}
+```
+
+The backend performs:
+
+```text
+Question
+ ↓
+Question Rewriting
+ ↓
+Embedding
+ ↓
+Vector Retrieval
+ ↓
+Context Construction
+ ↓
+LLM
+ ↓
+Answer + Sources
+```
+
+---
+
+## Conversation History
 
 Conversations and messages are persisted separately from document data.
 
@@ -338,13 +401,18 @@ Conversation
           └── ASSISTANT
 ```
 
-Conversation history is used to understand follow-up questions.
+This allows users to:
+
+* Continue existing conversations
+* Ask contextual follow-up questions
+* Reopen previous conversations
+* Preserve conversation history
 
 ---
 
-### Source References
+## Source References
 
-Every RAG response can contain references to the documents used to generate the answer.
+RAG responses include references to the document chunks used during retrieval.
 
 Example:
 
@@ -356,7 +424,7 @@ Example:
 }
 ```
 
-This allows the frontend to show users where an answer came from.
+These references allow the frontend to show users where the information used to generate an answer came from.
 
 ---
 
@@ -388,7 +456,129 @@ Conversation
 
 ---
 
-# 🔌 Current API
+# 🧩 Backend Structure
+
+The Spring Boot backend is organized into configuration, controllers, DTOs, domain models, repositories, services, and exception handling.
+
+```text
+src/main/java/com/learnvault/learnvaultbackend
+
+├── config
+│   ├── CorsConfig
+│   └── OllamaConfig
+│
+├── controller
+│   ├── ChatController
+│   ├── ConversationController
+│   ├── DocumentController
+│   ├── HealthController
+│   └── KnowledgeSpaceController
+│
+├── dto
+│   ├── ApiErrorResponse
+│   ├── ChatRequest
+│   ├── ChatResponse
+│   ├── ConversationResponse
+│   ├── DocumentResponse
+│   ├── KnowledgeSpaceRequest
+│   ├── MessageResponse
+│   ├── RagResponse
+│   ├── RetrievedChunkResponse
+│   └── SourceResponse
+│
+├── exception
+│   ├── BadRequestException
+│   ├── GlobalExceptionHandler
+│   └── ResourceNotFoundException
+│
+├── model
+│   ├── Conversation
+│   ├── Document
+│   ├── DocumentChunk
+│   ├── KnowledgeSpace
+│   └── Message
+│
+├── repository
+│   ├── ConversationRepository
+│   ├── DocumentChunkRepository
+│   ├── DocumentRepository
+│   ├── KnowledgeSpaceRepository
+│   └── MessageRepository
+│
+└── service
+    ├── ChatService
+    ├── ConversationService
+    ├── DocumentService
+    ├── EmbeddingService
+    ├── KnowledgeSpaceService
+    ├── PageChunk
+    ├── PdfService
+    ├── QuestionRetrieverService
+    ├── RagService
+    └── RetrievalService
+```
+
+---
+
+# 🎨 Frontend Structure
+
+The Angular application is organized by feature:
+
+```text
+src/app
+
+├── features
+│   ├── chat
+│   ├── documents
+│   └── knowledge-spaces
+│
+└── shared
+    └── components
+        ├── dialog
+        └── layout
+```
+
+The feature-based structure keeps the main application functionality separated into independent areas.
+
+### Chat
+
+Handles:
+
+* Chat interface
+* Sending questions
+* Conversation history
+* Loading states
+* Source display
+* Opening previous conversations
+* Follow-up questions
+
+### Documents
+
+Handles:
+
+* Document listing
+* PDF upload
+* Knowledge Space-specific documents
+
+### Knowledge Spaces
+
+Handles:
+
+* Knowledge Space listing
+* Knowledge Space creation
+* Validation
+* Duplicate-name handling
+
+### Shared Components
+
+Reusable UI components such as:
+
+* Dialog
+* Application layout
+
+---
+
+# 🔌 API
 
 ## Chat
 
@@ -413,7 +603,7 @@ Example response:
 ```json
 {
   "conversationId": 1,
-  "answer": "LangChain is a rapidly emerging framework...",
+  "answer": "LangChain is ...",
   "sources": [
     {
       "documentId": 5,
@@ -436,9 +626,44 @@ For a follow-up question:
 
 ---
 
+## Knowledge Spaces
+
+```text
+GET  /api/knowledge-spaces
+POST /api/knowledge-spaces
+```
+
+Knowledge Spaces can be created and retrieved through the REST API.
+
+---
+
+## Documents
+
+PDF documents are uploaded to a specific Knowledge Space.
+
+```text
+POST /api/documents/upload?knowledgeSpaceId={id}
+```
+
+---
+
+## Conversations
+
+Conversations can be retrieved for a Knowledge Space and individual conversation messages can be loaded.
+
+```text
+GET /api/conversations?knowledgeSpaceId={id}
+
+GET /api/conversations/{id}/messages
+```
+
+---
+
 # 📄 Document Processing
 
-PDF documents are processed using the following flow:
+PDF documents are processed page-by-page.
+
+The backend pipeline is:
 
 ```text
 MultipartFile
@@ -447,13 +672,13 @@ PDFBox
      ↓
 Extract text page-by-page
      ↓
-LangChain4j document representation
+Page-aware document representation
      ↓
 Recursive chunking
      ↓
 Embedding generation
      ↓
-PostgreSQL
+PostgreSQL + pgvector
 ```
 
 Each chunk retains its original page number so that source references can be returned to the client.
@@ -462,7 +687,7 @@ Each chunk retains its original page number so that source references can be ret
 
 # 🤖 Local AI
 
-LearnVault currently uses Ollama so that the AI pipeline can run locally.
+LearnVault uses Ollama to run the AI components locally.
 
 Required models:
 
@@ -477,11 +702,13 @@ Check installed models:
 ollama list
 ```
 
-The Ollama server runs locally at:
+Ollama runs locally at:
 
 ```text
 http://localhost:11434
 ```
+
+No external LLM API is required for the V1 RAG pipeline.
 
 ---
 
@@ -496,6 +723,7 @@ Install:
 * PostgreSQL 18
 * pgvector
 * Ollama
+* Node.js and npm
 
 Verify Java:
 
@@ -515,20 +743,28 @@ Verify Ollama:
 ollama list
 ```
 
----
-
-## 1. Clone the repository
+Verify Node.js:
 
 ```bash
-git clone <repository-url>
-cd learnvault-backend
+node --version
 ```
 
 ---
 
-## 2. Create the database
+## 1. Clone the Repository
 
-Create a PostgreSQL database:
+```bash
+git clone <repository-url>
+cd learnvault
+```
+
+The repository contains both the Angular frontend and Spring Boot backend.
+
+---
+
+## 2. Create the Database
+
+Create the PostgreSQL database:
 
 ```sql
 CREATE DATABASE learnvault;
@@ -556,7 +792,7 @@ WHERE extname = 'vector';
 
 ---
 
-## 3. Install Ollama models
+## 3. Install Ollama Models
 
 Pull the required models:
 
@@ -576,9 +812,9 @@ ollama list
 
 ---
 
-## 4. Configure Spring Boot
+## 4. Configure the Backend
 
-Configure PostgreSQL and Ollama in the application's configuration.
+Configure the PostgreSQL connection and Ollama settings in the Spring Boot application configuration.
 
 Example:
 
@@ -600,9 +836,9 @@ Do not commit real database passwords or other secrets to GitHub.
 
 ---
 
-## 5. Run the application
+## 5. Run the Backend
 
-Using Maven:
+From the backend directory:
 
 ```bash
 ./mvnw spring-boot:run
@@ -616,20 +852,56 @@ mvnw.cmd spring-boot:run
 
 ---
 
-# 🧪 Current Testing
+## 6. Run the Angular Frontend
 
-The RAG pipeline has been tested with a LangChain PDF.
+From the frontend directory:
 
-The system successfully performs:
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+ng serve
+```
+
+The Angular development server runs on:
 
 ```text
-"What is LangChain?"
+http://localhost:4200
+```
+
+The frontend communicates with the Spring Boot backend through the REST API.
+
+---
+
+# 🧪 Testing
+
+The complete V1 application flow has been tested locally.
+
+The primary workflow is:
+
+```text
+Create Knowledge Space
         ↓
-Relevant PDF chunks
+Upload PDF
         ↓
-LLM answer
+Document Processing
         ↓
-Source: LangChain.pdf, Page 1
+Chunking
+        ↓
+Embedding Generation
+        ↓
+Vector Storage
+        ↓
+Ask Question
+        ↓
+Retrieve Relevant Chunks
+        ↓
+Generate Grounded Answer
+        ↓
+Display Sources
 ```
 
 Conversational retrieval has also been tested:
@@ -639,21 +911,22 @@ Conversational retrieval has also been tested:
         ↓
 "What are its main components?"
         ↓
-Question rewritten to:
-"What are the main components of LangChain?"
+Question rewritten using conversation context
         ↓
 Relevant chunks retrieved
         ↓
 Grounded answer generated
 ```
 
+The application has also been tested for core validation and error-handling scenarios, including duplicate Knowledge Space creation and the main document/chat workflows.
+
 ---
 
-# 🚧 Current Limitations
+# 🚧 Current V1 Scope
 
-The current V1 intentionally keeps the scope small.
+LearnVault V1 intentionally keeps the scope focused on the core personal learning assistant workflow.
 
-Currently not implemented:
+The following are **outside the current V1 scope**:
 
 * Authentication
 * Multi-user support
@@ -664,54 +937,37 @@ Currently not implemented:
 * LangGraph workflows
 * Voice interaction
 * Image understanding
-* Multiple file formats
+* Multiple document formats
 * Advanced reranking
 * Hybrid search
 * Production-scale infrastructure
 
-These features may be considered in future versions but are intentionally outside the current V1 scope.
+These can be considered in future versions.
 
 ---
 
-# 🗺️ Roadmap
+# 🗺️ Future Improvements
 
-## Phase 1 — Backend RAG ✅
+Potential future improvements include:
 
-* [x] Spring Boot backend
-* [x] PostgreSQL
-* [x] pgvector
-* [x] PDF extraction
-* [x] Chunking
-* [x] Embeddings
-* [x] Vector search
-* [x] RAG generation
-* [x] Conversation persistence
-* [x] Conversational question rewriting
-* [x] Source references
+* OCR support for PDFs without a usable text layer
+* Additional document formats
+* Improved retrieval quality
+* Hybrid search
+* Reranking
+* Better document management
+* Authentication and multi-user support
+* Cloud deployment
+* Advanced AI workflows
+* More advanced UI/UX
 
-## Phase 2 — Angular Frontend 🚧
-
-* [ ] Knowledge Space UI
-* [ ] Document upload UI
-* [ ] Chat interface
-* [ ] Conversation handling
-* [ ] Source display
-* [ ] Conversation history
-
-## Phase 3 — Product Refinement
-
-* [ ] Better error handling
-* [ ] Loading states
-* [ ] Improved prompts
-* [ ] Better document management
-* [ ] Retrieval quality improvements
-* [ ] UI/UX improvements
+These improvements are intentionally separated from V1 so that the core product remains small and maintainable.
 
 ---
 
 # 🎯 Project Philosophy
 
-LearnVault is intentionally being developed as a **small but genuinely useful product** rather than a collection of AI tutorials.
+LearnVault is intentionally developed as a **small but genuinely useful product**, rather than simply a collection of AI tutorials.
 
 The primary goal is to understand and implement the complete AI application pipeline:
 
@@ -733,7 +989,7 @@ Conversation
 User Interface
 ```
 
-The project also serves as a practical implementation of concepts learned from modern LangChain and Generative AI workflows using the Java ecosystem.
+The project also serves as a practical implementation of modern Generative AI and LangChain concepts using the Java ecosystem.
 
 ---
 
@@ -754,13 +1010,32 @@ pgvector
 
 ---
 
-# 📌 Status
+# 📌 Final Status
 
-**LearnVault V1 — Backend RAG milestone completed.**
+**LearnVault V1 — Completed**
 
-Next milestone:
+LearnVault currently provides a complete local AI learning workflow:
 
-> **Build the Angular frontend and connect it to the completed RAG backend.**
-
+```text
+Learning Material
+       ↓
+Knowledge Space
+       ↓
+PDF Upload
+       ↓
+Chunking + Embeddings
+       ↓
+Vector Database
+       ↓
+Question
+       ↓
+Conversational Retrieval
+       ↓
+Local LLM
+       ↓
+Grounded Answer
+       ↓
+Source References
 ```
-```
+
+The project can now serve as a foundation for future improvements while remaining a complete and functional V1 product.

@@ -1,0 +1,36 @@
+<h3 mat-dialog-title>
+  {{ data.title }}
+</h3>
+
+<mat-dialog-content>
+  <ng-container [ngTemplateOutlet]="data.content"></ng-container>
+
+  @if (data.errorMessage(); as errorMessage) {
+    <p class="dialog-error" role="alert">
+      {{ errorMessage }}
+    </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    type="button"
+    [disabled]="data.isBusy()"
+    (click)="cancel()">
+    {{ data.cancelText ?? 'Cancel' }}
+  </button>
+
+  <button
+    mat-flat-button
+    type="button"
+    [disabled]="data.isBusy()"
+    (click)="confirm()">
+
+    @if (data.isBusy()) {
+      Creating...
+    } @else {
+      {{ data.confirmText ?? 'Confirm' }}
+    }
+  </button>
+</mat-dialog-actions>
