@@ -149,13 +149,13 @@
                     <textarea placeholder="Ask a question..." rows="2" [value]="message()"
                         (input)="onMessageChange($event)" (keydown.enter)="$event.preventDefault(); sendMessage()"
                         [disabled]="sending() || loadingMessages()">
-      </textarea>
+                    </textarea>
 
                     <button mat-flat-button type="button" (click)="sendMessage()" [disabled]="
-          !message().trim() ||
-          sending() ||
-          loadingMessages()
-        ">
+                     !message().trim() ||
+                     sending() ||
+                     loadingMessages()
+                    ">
 
                         <mat-icon>send</mat-icon>
                         Send
